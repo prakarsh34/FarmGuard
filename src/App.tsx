@@ -3,24 +3,26 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Pages
 import Home from "./pages/Home";
-import MockTest from "./pages/MockTest";  // <-- Updated import
-import Login from "./pages/Login";
-import Progress from "./pages/ProgressPage";
-import Resources from "./pages/ResourcePage";
-import Signup from "./pages/Signup";
-import TipsPage from "./pages/TipsPage";
+import FindDrive from "./pages/FindDrive";
+import OurImpact from "./pages/OurImpact";
+import WhyDonate from "./pages/WhyDonate";
+import ForDonors from "./pages/ForDonors";
+import Emergency from "./pages/Emergency";
+
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/mocktest" element={<MockTest />} /> {/* Updated route */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/tips" element={<TipsPage />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/find-drive" element={<FindDrive/>} />
+        <Route path="/our-impact" element={<OurImpact/>} />
+        <Route path="/why-donate" element={<WhyDonate/>} />
+        <Route path="/for-donors" element={<ForDonors/>} />
+        <Route path="/emergency" element={<Emergency/>} />
+
+
+        
         <Route path="*" element={<div className="text-center py-20 text-2xl">Page Not Found</div>} />
       </Routes>
     </Router>
