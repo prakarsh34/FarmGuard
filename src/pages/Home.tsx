@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {
-  FaHeartbeat,
-  FaHandHoldingHeart,
-  FaHospitalUser,
+  FaLeaf,
+  FaCloudSunRain,
+  FaTractor,
   FaChevronDown,
-  FaBookMedical,
-  FaUserCheck,
-  FaBriefcaseMedical,
+  FaBookOpen,
+  FaShieldAlt,
+  FaBrain,
+  FaSeedling,
   FaTwitter,
   FaLinkedin,
   FaInstagram,
@@ -18,108 +19,107 @@ import {
 // --- Navigation ---
 const navLinks = [
   { to: "/", label: "Home" },
-  { to: "/why-donate", label: "Why Donate?" },
-  { to: "/find-drive", label: "Find a Drive" },
-  { to: "/our-impact", label: "Our Impact" },
-  { to: "/for-donors", label: "For Donors" },
+  { to: "/features", label: "Features" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/about-us", label: "About Us" },
 ];
 
-// --- Hospital Partner Logos ---
-const partnerHospitals = [
-  "City General Hospital",
-  "Unity Medical Center",
-  "Hope County Clinic",
-  "St. Jude's Children's Hospital",
-  "Metro Health Services",
-  "Community Regional",
-  "Sunrise Hospital",
+// --- Data Source Logos ---
+const keyDataSources = [
+  "Global Weather APIs",
+  "NASA Earth Data",
+  "USDA Crop Data",
+  "OpenSoilData Initiative",
+  "Local Weather Stations",
+  "Satellite Imagery Corp",
+  "AgriResearch Institute",
 ];
 
-// --- Features ---
+// --- Core Features / How It Works ---
 const features = [
   {
-    icon: <FaUserCheck className="h-8 w-8 text-red-600" />,
-    title: "1. Check Eligibility",
-    description: "A quick 2-minute check to see if you're eligible to donate blood and save lives.",
+    icon: <FaTractor className="h-8 w-8 text-green-600" />,
+    title: "1. Input Your Farm Data",
+    description: "Easily input your farm's location, crop type, and soil characteristics to get started.",
   },
   {
-    icon: <FaHospitalUser className="h-8 w-8 text-red-600" />,
-    title: "2. Find a Drive Nearby",
-    description: "Locate a convenient donation center or a mobile blood drive in your community.",
+    icon: <FaBrain className="h-8 w-8 text-green-600" />,
+    title: "2. AI-Powered Analysis",
+    description: "Our system processes real-time weather, soil moisture, and satellite data using advanced algorithms.",
   },
   {
-    icon: <FaHandHoldingHeart className="h-8 w-8 text-red-600" />,
-    title: "3. Donate & Save Lives",
-    description: "The donation itself takes about 10-15 minutes. One donation can save up to 3 lives.",
+    icon: <FaSeedling className="h-8 w-8 text-green-600" />,
+    title: "3. Get Smart Recommendations",
+    description: "Receive actionable insights on when to plant, irrigate, fertilize, and protect your crops.",
   },
 ];
 
-// --- Donor Resources ---
+// --- Farmer Resources ---
 const resources = [
   {
-    icon: <FaBookMedical className="h-10 w-10 text-rose-600" />,
-    title: "The Donation Process",
-    desc: "A step-by-step guide from arrival to post-donation care.",
+    icon: <FaBookOpen className="h-10 w-10 text-emerald-600" />,
+    title: "Crop-Specific Guides",
+    desc: "In-depth guides for various crops, from planting to harvest.",
   },
   {
-    icon: <FaUserCheck className="h-10 w-10 text-rose-600" />,
-    title: "Eligibility Requirements",
-    desc: "Understand the key health and travel criteria for donors.",
+    icon: <FaCloudSunRain className="h-10 w-10 text-emerald-600" />,
+    title: "Weather Pattern Insights",
+    desc: "Learn to interpret long-term weather forecasts for better planning.",
   },
   {
-    icon: <FaBriefcaseMedical className="h-10 w-10 text-rose-600" />,
-    title: "Post-Donation Care",
-    desc: "Tips to ensure you feel great after your donation.",
+    icon: <FaShieldAlt className="h-10 w-10 text-emerald-600" />,
+    title: "Integrated Pest Management",
+    desc: "Sustainable strategies to protect your crops from common pests.",
   },
   {
-    icon: <FaHeartbeat className="h-10 w-10 text-rose-600" />,
-    title: "Benefits of Donating",
-    desc: "Learn about the positive health benefits for donors.",
+    icon: <FaLeaf className="h-10 w-10 text-emerald-600" />,
+    title: "Soil Health Manual",
+    desc: "Tips and techniques to improve and maintain the health of your soil.",
   },
 ];
 
-// --- Impact Stories ---
-const impactStories = [
+// --- Success Stories ---
+const successStories = [
   {
-    title: "A Newborn's Second Chance Thanks to O- Donors",
-    excerpt: "Baby Aisha required a rare blood type for emergency surgery. Read how our community came together.",
+    title: "20% Yield Increase in Maize Fields with Optimized Irrigation",
+    excerpt: "See how a community in Punjab used our irrigation alerts to conserve water and boost their harvest.",
   },
   {
-    title: "Rohan's First Donation: 'It Was Easier Than I Thought!'",
-    excerpt: "A college student shares his experience, dispelling myths and encouraging his peers to donate.",
+    title: "Preventing a Blight Outbreak in Potato Crops",
+    excerpt: "A farmer in the Nilgiris shares how early pest warnings saved his entire crop from devastation.",
   },
   {
-    title: "Community Drive in Partnership with TechCorp Saves 150 Lives",
-    excerpt: "How a corporate partnership led to one of our most successful blood drives to date.",
+    title: "From Novice to Pro: A First-Generation Farmer's Journey",
+    excerpt: "Read how our crop guides helped a new farmer successfully manage a diverse vegetable farm.",
   },
 ];
 
 // --- Testimonials ---
 const testimonials = [
   {
-    quote: "The staff were amazing and made me feel so comfortable. Knowing I helped someone is the best feeling.",
-    author: "Priya S.",
-    company: "Regular Donor",
+    quote: "FarmGuard transformed the way I manage my fields. The recommendations are incredibly accurate and easy to follow.",
+    author: "Ravi Kumar",
+    company: "Farmer, Haryana",
   },
   {
-    quote: "My son is alive today because of selfless donors. I can't thank you enough.",
-    author: "Anil M.",
-    company: "Recipient's Father",
+    quote: "The data integration is seamless. We use it for our entire cooperative to make collective decisions.",
+    author: "Sunita Reddy",
+    company: "Co-op Manager, Andhra Pradesh",
   },
   {
-    quote: "Organizing a drive at our university was seamless with their help. Our students were proud to contribute.",
-    author: "Dr. Sharma",
-    company: "Community Drive Organizer",
+    quote: "As an agronomist, I recommend FarmGuard to all my clients. It's a powerful tool that brings modern tech to traditional farming.",
+    author: "Dr. Alok Verma",
+    company: "Agricultural Consultant",
   },
 ];
 
 // --- FAQ ---
 const faqData = [
-  { question: "Is donating blood safe?", answer: "Absolutely. We use sterile, single-use equipment for every donation to ensure your safety." },
-  { question: "How long does the whole process take?", answer: "From registration to refreshments, the entire process takes about an hour. The actual donation is only 10-15 minutes." },
-  { question: "Do I need to know my blood type?", answer: "Not at all. We will test your blood type for you after your first donation and inform you." },
-  { question: "How often can I donate whole blood?", answer: "You can donate whole blood every 56 days (8 weeks)." },
-  { question: "What should I do before donating?", answer: "Eat a healthy meal, drink plenty of water, and get a good night's sleep. Bring a valid ID." },
+    { question: "How does FarmGuard get its data?", answer: "We integrate data from leading sources, including satellite imagery providers, national weather services, and agricultural research institutions." },
+    { question: "Is it difficult to set up?", answer: "Not at all! Our setup process is simple and guided. You can have your farm profile ready in less than 15 minutes." },
+    { question: "Can I use this for a small, family-owned farm?", answer: "Absolutely. FarmGuard is designed to be scalable, providing valuable insights for farms of all sizes, from smallholdings to large agricultural enterprises." },
+    { question: "How often is the data updated?", answer: "Weather data is updated in real-time, while soil and crop data are updated based on the latest satellite passes and sensor readings, typically on a daily basis." },
+    { question: "Is my farm's data kept private?", answer: "Yes, data privacy and security are our top priorities. Your farm's specific data is encrypted and is never shared without your explicit consent." },
 ];
 
 // --- FAQ Item Typing ---
@@ -159,56 +159,55 @@ const Home: React.FC = () => {
         className="bg-white/90 shadow-sm py-4 px-8 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md"
         data-aos="fade-down"
       >
-        <h1 className="text-3xl font-bold text-red-600">Sahaay</h1>
+        <h1 className="text-3xl font-bold text-green-600">FarmGuard</h1>
 
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-slate-600 hover:text-red-600"
+              className="text-slate-600 hover:text-green-600"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        {/* Only Emergency Button */}
         <Link
-          to="/emergency"
-          className="bg-rose-700 text-white px-5 py-2 rounded-lg font-bold hover:bg-rose-800 animate-pulse"
+          to="/get-started"
+          className="bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700"
         >
-          EMERGENCY
+          Get Started
         </Link>
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-r from-red-50 to-rose-50 text-center py-28" data-aos="fade-up">
+      <section className="bg-gradient-to-r from-green-50 to-emerald-50 text-center py-28" data-aos="fade-up">
         <h2 className="text-5xl font-extrabold mb-6">
-          Every Drop Counts. <span className="text-red-600">Be a Hero.</span>
+          Cultivating the Future. <span className="text-green-600">Harvest with Intelligence.</span>
         </h2>
         <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
-          Join thousands of volunteers and help save lives in your community. Your donation can make a world of difference.
+          Leverage AI and real-time data to make smarter farming decisions, increase yields, and optimize resources.
         </p>
         <Link
-          to="/schedule-donation"
-          className="bg-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-red-700"
+          to="/dashboard"
+          className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700"
         >
-          Donate Blood Now ❤️
+          Go to Dashboard 🌱
         </Link>
       </section>
 
-      {/* Hospital Partners Marquee */}
+      {/* Data Sources Marquee */}
       <section className="bg-slate-50 py-6" data-aos="fade-up">
-        <p className="text-center text-slate-500 font-semibold mb-4">PROUDLY PARTNERED WITH</p>
+        <p className="text-center text-slate-500 font-semibold mb-4">POWERED BY TRUSTED DATA SOURCES</p>
         <div className="train-track">
           <div className="train">
-            {/* Render the list of partners */}
-            {partnerHospitals.map((logo, i) => (
+            {/* Render the list of sources */}
+            {keyDataSources.map((logo, i) => (
               <span key={i}>{logo}</span>
             ))}
             {/* Render the list AGAIN for a seamless loop */}
-            {partnerHospitals.map((logo, i) => (
+            {keyDataSources.map((logo, i) => (
               <span key={`dup-${i}`}>{logo}</span>
             ))}
           </div>
@@ -217,7 +216,7 @@ const Home: React.FC = () => {
 
       {/* Features */}
       <section id="features" className="py-20 text-center container mx-auto px-4" data-aos="fade-up">
-        <h3 className="text-4xl font-bold mb-12">The Donation Process</h3>
+        <h3 className="text-4xl font-bold mb-12">How FarmGuard Works</h3>
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((f, i) => (
             <div
@@ -235,9 +234,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* Resources */}
-      <section id="resources" className="bg-rose-50 py-20" data-aos="fade-up">
+      <section id="resources" className="bg-green-50 py-20" data-aos="fade-up">
         <div className="container mx-auto text-center px-4">
-          <h3 className="text-4xl font-bold mb-12">Donor Resources & Info</h3>
+          <h3 className="text-4xl font-bold mb-12">Farmer's Toolkit & Knowledge Base</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {resources.map((r, i) => (
               <div
@@ -255,8 +254,9 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Hero, Stats, Testimonials, FAQ, Footer remain unchanged */}
-      {/* ... */}
+      {/* Placeholder for other sections like Testimonials, FAQ, Footer etc. */}
+      {/* ... Add other sections like Testimonials and FAQ here using the data provided ... */}
+
     </div>
   );
 };
