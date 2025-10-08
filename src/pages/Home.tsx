@@ -159,7 +159,7 @@ const Home: React.FC = () => {
         className="bg-white/90 shadow-sm py-4 px-8 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md"
         data-aos="fade-down"
       >
-        <h1 className="text-3xl font-bold text-red-600">LifeLink</h1>
+        <h1 className="text-3xl font-bold text-red-600">Sahaay</h1>
 
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
@@ -199,20 +199,18 @@ const Home: React.FC = () => {
       </section>
 
       {/* Hospital Partners Marquee */}
-      <section className="bg-slate-50 py-6 overflow-hidden" data-aos="fade-up">
+      <section className="bg-slate-50 py-6" data-aos="fade-up">
         <p className="text-center text-slate-500 font-semibold mb-4">PROUDLY PARTNERED WITH</p>
-        <div className="relative flex">
-          <div className="flex space-x-20 animate-marquee text-slate-500 text-lg font-medium">
+        <div className="train-track">
+          <div className="train">
+            {/* Render the list of partners */}
             {partnerHospitals.map((logo, i) => (
-              <span key={i} className="whitespace-nowrap">{logo}</span>
+              <span key={i}>{logo}</span>
             ))}
-            <span className="w-20" aria-hidden="true" />
-          </div>
-          <div className="absolute top-0 flex space-x-20 animate-marquee2 text-slate-500 text-lg font-medium">
+            {/* Render the list AGAIN for a seamless loop */}
             {partnerHospitals.map((logo, i) => (
-              <span key={`dup-${i}`} className="whitespace-nowrap">{logo}</span>
+              <span key={`dup-${i}`}>{logo}</span>
             ))}
-            <span className="w-20" aria-hidden="true" />
           </div>
         </div>
       </section>

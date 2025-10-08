@@ -36,3 +36,42 @@
     transform: rotate(360deg);
   }
 }
+
+/* --- Train-style Marquee Animation --- */
+/* --- Train-style Marquee Animation --- */
+/* --- Train-like Marquee Animation --- */
+/* --- Train-like Marquee Animation --- */
+@keyframes train-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.train-track {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  position: relative;
+}
+
+.train {
+  display: inline-flex;
+  animation: train-marquee 25s linear infinite;
+  will-change: transform;
+}
+
+.train span {
+  display: inline-block;
+  margin-right: 4rem;
+  color: #475569; /* slate-600 */
+  font-weight: 500;
+  font-size: 1.125rem; /* text-lg */
+}
+
+/* Pause on hover */
+.train-track:hover .train {
+  animation-play-state: paused;
+}

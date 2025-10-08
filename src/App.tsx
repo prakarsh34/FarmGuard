@@ -1,4 +1,5 @@
 import React from "react";
+import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Pages
@@ -8,6 +9,7 @@ import OurImpact from "./pages/OurImpact";
 import WhyDonate from "./pages/WhyDonate";
 import ForDonors from "./pages/ForDonors";
 import Emergency from "./pages/Emergency";
+import ScheduleDonation from "./pages/ScheduleDonation";
 
 
 const App: React.FC = () => {
@@ -20,6 +22,8 @@ const App: React.FC = () => {
         <Route path="/why-donate" element={<WhyDonate/>} />
         <Route path="/for-donors" element={<ForDonors/>} />
         <Route path="/emergency" element={<Emergency/>} />
+        <Route path="/schedule-donation" element={<ScheduleDonation/>} />
+
 
 
         
