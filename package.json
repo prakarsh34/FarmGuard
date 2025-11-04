@@ -10,6 +10,7 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.126",
     "aos": "^2.3.4",
+    "firebase": "^12.5.0",
     "framer-motion": "^12.23.13",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
