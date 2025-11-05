@@ -1,3 +1,4 @@
+// src/pages/Home.tsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import AOS from "aos";
@@ -12,6 +13,8 @@ import {
   FaBrain,
   FaSeedling,
 } from "react-icons/fa";
+import { db } from "../firebase";
+import { collection, getDocs, orderBy, limit, query } from "firebase/firestore";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -29,12 +32,14 @@ const features = [
   {
     icon: <FaBrain className="h-10 w-10 text-green-700" />,
     title: "Smart Analysis",
-    description: "We merge satellite, weather, and soil data to help you decide smarter.",
+    description:
+      "We merge satellite, weather, and soil data to help you decide smarter.",
   },
   {
     icon: <FaSeedling className="h-10 w-10 text-green-700" />,
     title: "Actionable Tips",
-    description: "Know when to plant, water, and protect — all in one dashboard.",
+    description:
+      "Know when to plant, water, and protect — all in one dashboard.",
   },
 ];
 
@@ -109,9 +114,32 @@ const faqData = [
 
 const Home: React.FC = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [farmerName, setFarmerName] = useState<string>("");
+  const [primaryCrop, setPrimaryCrop] = useState<string>("");
 
+  // ✅ Fetch latest farmer data from Firebase
   useEffect(() => {
     AOS.init({ duration: 1000, once: true, offset: 100 });
+
+    const fetchFarmerData = async () => {
+      try {
+        const q = query(
+          collection(db, "farmers"),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          const farmer = snapshot.docs[0].data();
+          setFarmerName(farmer.farmerName || "");
+          setPrimaryCrop(farmer.primaryCrop || "");
+        }
+      } catch (err) {
+        console.error("Error fetching farmer data:", err);
+      }
+    };
+
+    fetchFarmerData();
   }, []);
 
   return (
@@ -145,19 +173,29 @@ const Home: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative text-center py-28 overflow-hidden">
-        {/* Background blob */}
         <div className="absolute top-0 left-0 w-72 h-72 bg-green-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-amber-100 rounded-full blur-3xl opacity-40 animate-bounce-slow"></div>
 
         <div className="relative z-10" data-aos="fade-up">
           <h2 className="text-5xl font-extrabold mb-6 leading-snug">
-            <span className="text-green-700">Smarter Farming</span> <br />
-            For Every Growing Future
+            Welcome{" "}
+            {farmerName ? (
+              <span className="text-green-700">{farmerName}</span>
+            ) : (
+              "Farmer"
+            )}
+            <br />
+            Growing the Future with{" "}
+            <span className="text-green-700">
+              {primaryCrop || "your crops"}
+            </span>
           </h2>
+
           <p className="text-lg text-amber-800 mb-8 max-w-2xl mx-auto">
             AI-powered guidance to grow more, waste less, and nurture your land
             sustainably.
           </p>
+
           <Link
             to="/dashboard"
             className="bg-green-700 text-white px-8 py-4 rounded-full font-semibold hover:bg-green-800 transition"
@@ -171,7 +209,10 @@ const Home: React.FC = () => {
       <div className="w-full h-24 bg-gradient-to-b from-green-50 to-amber-50 rounded-t-[100%] mt-[-2rem]"></div>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-br from-green-50 to-amber-50" data-aos="fade-up">
+      <section
+        className="py-20 bg-gradient-to-br from-green-50 to-amber-50"
+        data-aos="fade-up"
+      >
         <h3 className="text-4xl font-bold text-center mb-12">
           How FarmGuard Works
         </h3>
@@ -179,7 +220,9 @@ const Home: React.FC = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className={`relative bg-white rounded-3xl shadow-md p-8 w-80 transition-transform hover:-translate-y-2 hover:shadow-xl ${i % 2 === 0 ? "rotate-1" : "-rotate-1"}`}
+              className={`relative bg-white rounded-3xl shadow-md p-8 w-80 transition-transform hover:-translate-y-2 hover:shadow-xl ${
+                i % 2 === 0 ? "rotate-1" : "-rotate-1"
+              }`}
               data-aos="zoom-in"
               data-aos-delay={i * 200}
             >
@@ -193,7 +236,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Resources */}
+      {/* Resources Section */}
       <section
         className="relative py-24 bg-white overflow-hidden"
         data-aos="fade-up"
@@ -209,7 +252,7 @@ const Home: React.FC = () => {
             {resources.map((r, i) => (
               <div
                 key={i}
-                className={`bg-gradient-to-b from-amber-50 to-green-50 shadow-md rounded-[2rem] p-6 w-72 transform hover:scale-105 transition-all duration-500`}
+                className="bg-gradient-to-b from-amber-50 to-green-50 shadow-md rounded-[2rem] p-6 w-72 transform hover:scale-105 transition-all duration-500"
                 data-aos="fade-up"
                 data-aos-delay={i * 150}
               >
@@ -224,7 +267,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ Section */}
       <section
         className="py-20 bg-gradient-to-r from-amber-50 to-green-50"
         data-aos="fade-up"
