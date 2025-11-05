@@ -3,11 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { db, auth } from "../firebase";
 import {
-  addDoc,
-  collection,
-  serverTimestamp,
   doc,
   setDoc,
+  serverTimestamp,
+  getDoc,
 } from "firebase/firestore";
 import {
   onAuthStateChanged,
@@ -17,76 +16,28 @@ import {
 
 // --- SVG Icons ---
 const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
   </svg>
 );
 const LocationIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-    />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 const SeedlingIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 const CheckCircleIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-16 w-16 text-green-500"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
+// Step component
 const Step = ({
   icon,
   title,
@@ -98,16 +49,8 @@ const Step = ({
   stepNumber: number;
   isActive: boolean;
 }) => (
-  <div
-    className={`flex items-center space-x-3 ${
-      isActive ? "text-green-600" : "text-gray-400"
-    }`}
-  >
-    <div
-      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-        isActive ? "border-green-600 bg-green-50" : "border-gray-300"
-      }`}
-    >
+  <div className={`flex items-center space-x-3 ${isActive ? "text-green-600" : "text-gray-400"}`}>
+    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${isActive ? "border-green-600 bg-green-50" : "border-gray-300"}`}>
       {icon}
     </div>
     <div>
@@ -132,23 +75,30 @@ const GetStarted: React.FC = () => {
     password: "",
   });
 
+  // Track login state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        // ✅ Pre-fill user details
         setFormData((prev) => ({
           ...prev,
           farmerName: currentUser.displayName || prev.farmerName,
           email: currentUser.email || prev.email,
         }));
+
+        // ✅ Auto-skip if profile already exists
+        const farmerDoc = await getDoc(doc(db, "farmers", currentUser.uid));
+        if (farmerDoc.exists()) {
+          console.log("✅ Existing farmer data found, skipping setup");
+          navigate("/dashboard", { replace: true });
+        }
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -163,36 +113,29 @@ const GetStarted: React.FC = () => {
     try {
       let currentUser = user;
 
-      // 🔐 If not logged in, create user account first
+      // ✅ Create account if not logged in
       if (!currentUser) {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          formData.email,
-          formData.password
-        );
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         currentUser = userCredential.user;
         await updateProfile(currentUser, { displayName: formData.farmerName });
-
-        // store basic user info in Firestore
-        await setDoc(doc(db, "farmers", currentUser.uid), {
-          farmerName: formData.farmerName,
-          email: formData.email,
-          createdAt: serverTimestamp(),
-        });
       }
 
-      // ✅ Save farm setup data
-      await addDoc(collection(db, "farms"), {
-        ...formData,
+      // ✅ Save or update farmer data under the same UID
+      await setDoc(doc(db, "farmers", currentUser.uid), {
+        farmerName: formData.farmerName,
+        farmName: formData.farmName,
+        location: formData.location,
+        primaryCrop: formData.primaryCrop,
+        email: currentUser.email,
         userId: currentUser.uid,
         createdAt: serverTimestamp(),
       });
 
-      alert("✅ Setup completed successfully!");
+      alert("✅ Farm setup completed successfully!");
       navigate("/dashboard", { replace: true });
     } catch (err: any) {
-      console.error("❌ Firebase error:", err.message);
-      alert("Error: " + err.message);
+      console.error("❌ Firestore save error:", err.message);
+      alert("Failed to save data: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -214,41 +157,24 @@ const GetStarted: React.FC = () => {
   return (
     <div className="font-sans bg-gray-50 min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden md:flex">
-        {/* Left Section */}
+        {/* Left Panel */}
         <div className="w-full md:w-1/3 bg-gradient-to-b from-green-500 to-emerald-600 p-8 text-white">
           <h2 className="text-2xl font-bold mb-8">Farm Setup</h2>
           <div className="space-y-8">
-            <Step
-              icon={<UserIcon />}
-              title="Your Profile"
-              stepNumber={1}
-              isActive={step >= 1}
-            />
-            <Step
-              icon={<LocationIcon />}
-              title="Farm Location"
-              stepNumber={2}
-              isActive={step >= 2}
-            />
-            <Step
-              icon={<SeedlingIcon />}
-              title="Primary Crop"
-              stepNumber={3}
-              isActive={step >= 3}
-            />
+            <Step icon={<UserIcon />} title="Your Profile" stepNumber={1} isActive={step >= 1} />
+            <Step icon={<LocationIcon />} title="Farm Location" stepNumber={2} isActive={step >= 2} />
+            <Step icon={<SeedlingIcon />} title="Primary Crop" stepNumber={3} isActive={step >= 3} />
           </div>
         </div>
 
-        {/* Right Section */}
+        {/* Right Panel */}
         <div className="w-full md:w-2/3 p-8 md:p-12">
           <form onSubmit={handleSubmit}>
-            {/* Step 1 - Profile + Login */}
+            {/* Step 1 */}
             {step === 1 && (
               <div>
                 <h2 className="text-3xl font-bold mb-2">Welcome to FarmGuard!</h2>
-                <p className="text-gray-600 mb-6">
-                  Let's start by setting up your profile and login details.
-                </p>
+                <p className="text-gray-600 mb-6">Let's start by setting up your profile and login details.</p>
                 <div className="space-y-4">
                   <input
                     name="farmerName"
@@ -280,13 +206,11 @@ const GetStarted: React.FC = () => {
               </div>
             )}
 
-            {/* Step 2 - Farm details */}
+            {/* Step 2 */}
             {step === 2 && (
               <div>
                 <h2 className="text-3xl font-bold mb-2">Pinpoint Your Farm</h2>
-                <p className="text-gray-600 mb-6">
-                  This helps us provide accurate weather and soil data.
-                </p>
+                <p className="text-gray-600 mb-6">This helps us provide accurate weather and soil data.</p>
                 <input
                   name="farmName"
                   placeholder="Farm Name"
@@ -306,15 +230,11 @@ const GetStarted: React.FC = () => {
               </div>
             )}
 
-            {/* Step 3 - Crop */}
+            {/* Step 3 */}
             {step === 3 && (
               <div>
-                <h2 className="text-3xl font-bold mb-2">
-                  What's Your Main Crop?
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  You can add more later in your dashboard.
-                </p>
+                <h2 className="text-3xl font-bold mb-2">What's Your Main Crop?</h2>
+                <p className="text-gray-600 mb-6">You can add more later in your dashboard.</p>
                 <select
                   name="primaryCrop"
                   value={formData.primaryCrop}
@@ -333,14 +253,12 @@ const GetStarted: React.FC = () => {
               </div>
             )}
 
-            {/* Step 4 - Confirmation */}
+            {/* Step 4 */}
             {step === 4 && (
               <div className="text-center">
                 <CheckCircleIcon />
                 <h2 className="text-3xl font-bold mt-4">All Set!</h2>
-                <p className="text-gray-600 my-4">
-                  Your FarmGuard profile has been created successfully.
-                </p>
+                <p className="text-gray-600 my-4">Your FarmGuard profile has been created successfully.</p>
                 <button
                   type="submit"
                   disabled={loading}

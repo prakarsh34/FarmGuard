@@ -70,34 +70,6 @@ const resources = [
   },
 ];
 
-const FAQItem = ({
-  item,
-  isOpen,
-  onClick,
-}: {
-  item: { question: string; answer: string };
-  isOpen: boolean;
-  onClick: () => void;
-}) => (
-  <div
-    className="border-b border-amber-200 py-4 transition-all duration-300"
-    data-aos="fade-up"
-  >
-    <button
-      onClick={onClick}
-      className="w-full flex justify-between items-center text-left text-lg font-semibold text-amber-900"
-    >
-      <span>{item.question}</span>
-      <FaChevronDown
-        className={`transition-transform duration-300 ${
-          isOpen ? "rotate-180 text-green-700" : "text-amber-700"
-        }`}
-      />
-    </button>
-    {isOpen && <p className="mt-3 text-amber-700">{item.answer}</p>}
-  </div>
-);
-
 const faqData = [
   {
     question: "Is FarmGuard suitable for small farmers?",
@@ -113,6 +85,11 @@ const faqData = [
     question: "Is my data safe?",
     answer:
       "Absolutely. We use end-to-end encryption and your farm data is never shared.",
+  },
+  {
+    question: "Can I add multiple farms?",
+    answer:
+      "Yes, you can manage multiple farms and crops through your dashboard easily.",
   },
 ];
 
@@ -154,13 +131,13 @@ const Home: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Proper Logout Handler
+  // ✅ Logout
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Firebase sign-out
-      localStorage.clear(); // clear any cached farmer data
+      await signOut(auth);
+      localStorage.clear();
       sessionStorage.clear();
-      setUser(null); // instantly update UI
+      setUser(null);
       alert("👋 You’ve been logged out successfully!");
       navigate("/login", { replace: true });
     } catch (error) {
@@ -262,6 +239,81 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white" data-aos="fade-up">
+        <h2 className="text-4xl font-bold text-center mb-12 text-green-800">
+          Why Choose FarmGuard?
+        </h2>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 px-6">
+          {features.map((f, index) => (
+            <div
+              key={index}
+              className="p-6 bg-[#fefcf6] rounded-2xl shadow-md hover:shadow-lg transition text-center"
+            >
+              <div className="flex justify-center mb-4">{f.icon}</div>
+              <h3 className="text-2xl font-semibold mb-2">{f.title}</h3>
+              <p className="text-amber-800">{f.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Resources Section */}
+      <section className="py-20 bg-amber-50" data-aos="fade-up">
+        <h2 className="text-4xl font-bold text-center mb-12 text-green-800">
+          Resources for Every Farmer
+        </h2>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-6">
+          {resources.map((r, index) => (
+            <div
+              key={index}
+              className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition text-center"
+            >
+              <div className="flex justify-center mb-3">{r.icon}</div>
+              <h3 className="text-xl font-bold mb-2">{r.title}</h3>
+              <p className="text-gray-600">{r.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white" data-aos="fade-up">
+        <h2 className="text-4xl font-bold text-center mb-10 text-green-800">
+          Frequently Asked Questions
+        </h2>
+        <div className="max-w-3xl mx-auto px-6">
+          {faqData.map((item, index) => (
+            <div key={index} className="border-b border-amber-200 py-4">
+              <button
+                onClick={() =>
+                  setOpenFaqIndex(openFaqIndex === index ? null : index)
+                }
+                className="w-full flex justify-between items-center text-left text-lg font-semibold text-amber-900"
+              >
+                <span>{item.question}</span>
+                <FaChevronDown
+                  className={`transition-transform duration-300 ${
+                    openFaqIndex === index
+                      ? "rotate-180 text-green-700"
+                      : "text-amber-700"
+                  }`}
+                />
+              </button>
+              {openFaqIndex === index && (
+                <p className="mt-3 text-amber-700">{item.answer}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-green-700 text-white py-6 text-center">
+        <p>© {new Date().getFullYear()} FarmGuard. All rights reserved.</p>
+        <p className="text-sm mt-2">Empowering farmers with data and AI 🌱</p>
+      </footer>
     </div>
   );
 };

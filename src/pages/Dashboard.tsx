@@ -39,9 +39,7 @@ const DollarAlertIcon = () => (
   </svg>
 );
 
-// Mock weather data for UI
 const weatherData = {
-  location: "Kattankulathur, Tamil Nadu",
   temperature: 29,
   condition: "Partly Cloudy",
   humidity: 75,
@@ -53,7 +51,6 @@ const weatherData = {
   ],
 };
 
-// Alerts (static for now)
 const alertsData = [
   {
     id: 1,
@@ -72,6 +69,33 @@ const alertsData = [
     type: "Info",
     message: "Market price for tomatoes is up by 8%. Consider harvesting soon.",
     icon: <DollarAlertIcon />,
+  },
+];
+
+const cropsData = [
+  {
+    id: 1,
+    name: "Plot A - Tomatoes",
+    stage: "Flowering",
+    moisture: "25%",
+    health: "Good",
+    alert: "Low Moisture",
+  },
+  {
+    id: 2,
+    name: "Plot B - Corn",
+    stage: "Vegetative",
+    moisture: "60%",
+    health: "Excellent",
+    alert: "Pest Warning",
+  },
+  {
+    id: 3,
+    name: "Plot C - Wheat",
+    stage: "Grain Fill",
+    moisture: "55%",
+    health: "Good",
+    alert: "None",
   },
 ];
 
@@ -147,27 +171,15 @@ const Dashboard: React.FC = () => {
           </button>
         </header>
 
-        {/* Farmer Details Section */}
+        {/* Farmer Details */}
         {farmerData && (
           <section className="bg-white p-6 rounded-xl shadow-lg mb-8">
             <h2 className="text-2xl font-bold mb-4">Farmer Profile</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <p>
-                <span className="font-semibold">Farm Name:</span>{" "}
-                {farmerData.farmName || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Location:</span>{" "}
-                {farmerData.location || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Primary Crop:</span>{" "}
-                {farmerData.primaryCrop || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Email:</span>{" "}
-                {farmerData.email || "N/A"}
-              </p>
+              <p><span className="font-semibold">Farm Name:</span> {farmerData.farmName || "N/A"}</p>
+              <p><span className="font-semibold">Location:</span> {farmerData.location || "N/A"}</p>
+              <p><span className="font-semibold">Primary Crop:</span> {farmerData.primaryCrop || "N/A"}</p>
+              <p><span className="font-semibold">Email:</span> {farmerData.email || "N/A"}</p>
             </div>
           </section>
         )}
@@ -176,12 +188,14 @@ const Dashboard: React.FC = () => {
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Weather Widget */}
+            {/* Weather */}
             <section className="bg-white p-6 rounded-xl shadow-lg">
               <h2 className="text-2xl font-bold mb-4">Weather Overview</h2>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
                 <div>
-                  <p className="text-lg text-gray-600">{weatherData.location}</p>
+                  <p className="text-lg text-gray-600">
+                    {farmerData?.location || "Kattankulathur, Tamil Nadu"}
+                  </p>
                   <p className="text-6xl font-bold text-gray-800">
                     {weatherData.temperature}°C
                   </p>
@@ -206,16 +220,50 @@ const Dashboard: React.FC = () => {
               </div>
             </section>
 
-            {/* Placeholder Crop Section */}
+            {/* Crop Insights */}
             <section className="bg-white p-6 rounded-xl shadow-lg">
               <h2 className="text-2xl font-bold mb-4">Crop Insights</h2>
-              <p className="text-gray-600">
-                Coming soon — crop health data synced directly from your farm!
+              <div className="space-y-4">
+                {cropsData.map((crop) => (
+                  <div
+                    key={crop.id}
+                    className="p-4 border rounded-lg flex justify-between items-center"
+                  >
+                    <div>
+                      <h3 className="font-bold text-lg">{crop.name}</h3>
+                      <p className="text-sm text-gray-500">
+                        Stage: {crop.stage} | Soil Moisture: {crop.moisture}
+                      </p>
+                    </div>
+                    <div
+                      className={`px-3 py-1 text-sm rounded-full ${
+                        crop.alert !== "None"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {crop.alert !== "None" ? crop.alert : "Healthy"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Market Insights */}
+            <section className="bg-white p-6 rounded-xl shadow-lg">
+              <h2 className="text-2xl font-bold mb-4">Market Insights</h2>
+              <p className="text-gray-600 mb-2">
+                Based on your crop <span className="font-semibold">{farmerData?.primaryCrop}</span>:
               </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>Average price increased by 5% this week.</li>
+                <li>Nearby mandis report high demand.</li>
+                <li>Best time to sell expected in next 7 days.</li>
+              </ul>
             </section>
           </div>
 
-          {/* Right Column (Alerts) */}
+          {/* Right Column */}
           <div className="lg:col-span-1">
             <section className="bg-white p-6 rounded-xl shadow-lg">
               <h2 className="text-2xl font-bold mb-4">Actionable Alerts</h2>
