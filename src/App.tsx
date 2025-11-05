@@ -1,29 +1,19 @@
-import React from "react";
-import './App.css';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// Pages
-import Home from "./pages/Home";
-import Features from "./pages/Features";
-import Dashboard from "./pages/Dashboard";
-import AboutUs from "./pages/AboutUs";
+// src/App.tsx
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import GetStarted from "./pages/GetStarted";
-
-
-const App: React.FC = () => {
+import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+export default function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/features" element={<Features/>} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/about-us" element={<AboutUs/>}  />
-        <Route path="/get-started" element={<GetStarted/>}  />
-
-        <Route path="*" element={<div className="text-center py-20 text-2xl">Page Not Found</div>} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/get-started" element={<GetStarted />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
-};
-
-export default App;
+}

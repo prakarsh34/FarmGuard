@@ -1,14 +1,91 @@
 // src/pages/GetStarted.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { db } from "../firebase"; // ✅ import Firestore
-import { doc, setDoc } from "firebase/firestore";
+import { db, auth } from "../firebase";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  doc,
+  setDoc,
+} from "firebase/firestore";
+import {
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
-// --- SVG Icons (unchanged) ---
-const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>;
-const LocationIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
-const SeedlingIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+// --- SVG Icons ---
+const UserIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+    />
+  </svg>
+);
+const LocationIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+  </svg>
+);
+const SeedlingIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+const CheckCircleIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-16 w-16 text-green-500"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
 
 const Step = ({
   icon,
@@ -21,7 +98,11 @@ const Step = ({
   stepNumber: number;
   isActive: boolean;
 }) => (
-  <div className={`flex items-center space-x-3 ${isActive ? "text-green-600" : "text-gray-400"}`}>
+  <div
+    className={`flex items-center space-x-3 ${
+      isActive ? "text-green-600" : "text-gray-400"
+    }`}
+  >
     <div
       className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
         isActive ? "border-green-600 bg-green-50" : "border-gray-300"
@@ -40,14 +121,34 @@ const GetStarted: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
   const [formData, setFormData] = useState({
     farmerName: "",
     farmName: "",
     location: "",
     primaryCrop: "",
+    email: "",
+    password: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setFormData((prev) => ({
+          ...prev,
+          farmerName: currentUser.displayName || prev.farmerName,
+          email: currentUser.email || prev.email,
+        }));
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -60,21 +161,38 @@ const GetStarted: React.FC = () => {
     setLoading(true);
 
     try {
-      // Save to localStorage
-      localStorage.setItem("farmerData", JSON.stringify(formData));
+      let currentUser = user;
 
-      // ✅ Save to Firestore (creates or updates doc)
-      const docRef = doc(db, "farmers", formData.farmerName.replace(/\s+/g, "_"));
-      await setDoc(docRef, {
+      // 🔐 If not logged in, create user account first
+      if (!currentUser) {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        currentUser = userCredential.user;
+        await updateProfile(currentUser, { displayName: formData.farmerName });
+
+        // store basic user info in Firestore
+        await setDoc(doc(db, "farmers", currentUser.uid), {
+          farmerName: formData.farmerName,
+          email: formData.email,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // ✅ Save farm setup data
+      await addDoc(collection(db, "farms"), {
         ...formData,
-        createdAt: new Date(),
+        userId: currentUser.uid,
+        createdAt: serverTimestamp(),
       });
 
-      console.log("✅ Farmer data saved to Firestore successfully");
-      navigate("/dashboard", { state: { farmerData: formData }, replace: true });
-    } catch (err) {
-      console.error("❌ Firestore update failed:", err);
-      alert("Failed to save data to Firebase. Please try again.");
+      alert("✅ Setup completed successfully!");
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      console.error("❌ Firebase error:", err.message);
+      alert("Error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -83,9 +201,9 @@ const GetStarted: React.FC = () => {
   const isNextDisabled = () => {
     switch (step) {
       case 1:
-        return !formData.farmerName || !formData.farmName;
+        return !formData.farmerName || !formData.email || !formData.password;
       case 2:
-        return !formData.location;
+        return !formData.farmName || !formData.location;
       case 3:
         return !formData.primaryCrop;
       default:
@@ -96,106 +214,133 @@ const GetStarted: React.FC = () => {
   return (
     <div className="font-sans bg-gray-50 min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden md:flex">
-        {/* Left: Steps */}
+        {/* Left Section */}
         <div className="w-full md:w-1/3 bg-gradient-to-b from-green-500 to-emerald-600 p-8 text-white">
           <h2 className="text-2xl font-bold mb-8">Farm Setup</h2>
           <div className="space-y-8">
-            <Step icon={<UserIcon />} title="Your Profile" stepNumber={1} isActive={step >= 1} />
-            <Step icon={<LocationIcon />} title="Farm Location" stepNumber={2} isActive={step >= 2} />
-            <Step icon={<SeedlingIcon />} title="Primary Crop" stepNumber={3} isActive={step >= 3} />
+            <Step
+              icon={<UserIcon />}
+              title="Your Profile"
+              stepNumber={1}
+              isActive={step >= 1}
+            />
+            <Step
+              icon={<LocationIcon />}
+              title="Farm Location"
+              stepNumber={2}
+              isActive={step >= 2}
+            />
+            <Step
+              icon={<SeedlingIcon />}
+              title="Primary Crop"
+              stepNumber={3}
+              isActive={step >= 3}
+            />
           </div>
         </div>
 
-        {/* Right: Form */}
+        {/* Right Section */}
         <div className="w-full md:w-2/3 p-8 md:p-12">
           <form onSubmit={handleSubmit}>
-            {/* Step 1 */}
+            {/* Step 1 - Profile + Login */}
             {step === 1 && (
               <div>
                 <h2 className="text-3xl font-bold mb-2">Welcome to FarmGuard!</h2>
-                <p className="text-gray-600 mb-6">Let's start by setting up your profile.</p>
+                <p className="text-gray-600 mb-6">
+                  Let's start by setting up your profile and login details.
+                </p>
                 <div className="space-y-4">
-                  <div>
-                    <label htmlFor="farmerName" className="font-semibold">Your Name</label>
-                    <input
-                      id="farmerName"
-                      name="farmerName"
-                      value={formData.farmerName}
-                      onChange={handleInputChange}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                      placeholder="e.g., Ramesh Kumar"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="farmName" className="font-semibold">Farm Name</label>
-                    <input
-                      id="farmName"
-                      name="farmName"
-                      value={formData.farmName}
-                      onChange={handleInputChange}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                      placeholder="e.g., Green Valley Farm"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2 */}
-            {step === 2 && (
-              <div>
-                <h2 className="text-3xl font-bold mb-2">Pinpoint Your Farm</h2>
-                <p className="text-gray-600 mb-6">This helps us provide accurate weather and soil data.</p>
-                <div>
-                  <label htmlFor="location" className="font-semibold">Location or Pincode</label>
                   <input
-                    id="location"
-                    name="location"
-                    value={formData.location}
+                    name="farmerName"
+                    placeholder="Your Name"
+                    value={formData.farmerName}
                     onChange={handleInputChange}
                     className="w-full mt-1 p-3 border rounded-lg"
-                    placeholder="e.g., Kattankulathur or 603203"
+                    required
+                  />
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Your Gmail"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full mt-1 p-3 border rounded-lg"
+                    required
+                  />
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full mt-1 p-3 border rounded-lg"
                     required
                   />
                 </div>
               </div>
             )}
 
-            {/* Step 3 */}
-            {step === 3 && (
+            {/* Step 2 - Farm details */}
+            {step === 2 && (
               <div>
-                <h2 className="text-3xl font-bold mb-2">What's Your Main Crop?</h2>
-                <p className="text-gray-600 mb-6">You can add more later in your dashboard.</p>
-                <div>
-                  <label htmlFor="primaryCrop" className="font-semibold">Primary Crop</label>
-                  <select
-                    id="primaryCrop"
-                    name="primaryCrop"
-                    value={formData.primaryCrop}
-                    onChange={handleInputChange}
-                    className="w-full mt-1 p-3 border rounded-lg bg-white"
-                    required
-                  >
-                    <option value="">Select a crop</option>
-                    <option value="Rice">Rice</option>
-                    <option value="Wheat">Wheat</option>
-                    <option value="Corn">Corn (Maize)</option>
-                    <option value="Tomatoes">Tomatoes</option>
-                    <option value="Sugarcane">Sugarcane</option>
-                    <option value="Cotton">Cotton</option>
-                  </select>
-                </div>
+                <h2 className="text-3xl font-bold mb-2">Pinpoint Your Farm</h2>
+                <p className="text-gray-600 mb-6">
+                  This helps us provide accurate weather and soil data.
+                </p>
+                <input
+                  name="farmName"
+                  placeholder="Farm Name"
+                  value={formData.farmName}
+                  onChange={handleInputChange}
+                  className="w-full mt-1 p-3 border rounded-lg"
+                  required
+                />
+                <input
+                  name="location"
+                  placeholder="Location or Pincode"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  className="w-full mt-3 p-3 border rounded-lg"
+                  required
+                />
               </div>
             )}
 
-            {/* Step 4 */}
+            {/* Step 3 - Crop */}
+            {step === 3 && (
+              <div>
+                <h2 className="text-3xl font-bold mb-2">
+                  What's Your Main Crop?
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  You can add more later in your dashboard.
+                </p>
+                <select
+                  name="primaryCrop"
+                  value={formData.primaryCrop}
+                  onChange={handleInputChange}
+                  className="w-full mt-1 p-3 border rounded-lg bg-white"
+                  required
+                >
+                  <option value="">Select a crop</option>
+                  <option value="Rice">Rice</option>
+                  <option value="Wheat">Wheat</option>
+                  <option value="Corn">Corn (Maize)</option>
+                  <option value="Tomatoes">Tomatoes</option>
+                  <option value="Sugarcane">Sugarcane</option>
+                  <option value="Cotton">Cotton</option>
+                </select>
+              </div>
+            )}
+
+            {/* Step 4 - Confirmation */}
             {step === 4 && (
               <div className="text-center">
                 <CheckCircleIcon />
                 <h2 className="text-3xl font-bold mt-4">All Set!</h2>
-                <p className="text-gray-600 my-4">Your FarmGuard profile has been created successfully.</p>
+                <p className="text-gray-600 my-4">
+                  Your FarmGuard profile has been created successfully.
+                </p>
                 <button
                   type="submit"
                   disabled={loading}
@@ -206,7 +351,7 @@ const GetStarted: React.FC = () => {
               </div>
             )}
 
-            {/* Nav Buttons */}
+            {/* Navigation Buttons */}
             {step < 4 && (
               <div className="mt-8 flex justify-between">
                 <button

@@ -1,6 +1,6 @@
 // src/pages/Home.tsx
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {
@@ -12,9 +12,13 @@ import {
   FaShieldAlt,
   FaBrain,
   FaSeedling,
+  FaUserCircle,
+  FaSignOutAlt,
+  FaSignInAlt,
 } from "react-icons/fa";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 import { collection, getDocs, orderBy, limit, query } from "firebase/firestore";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -116,8 +120,10 @@ const Home: React.FC = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [farmerName, setFarmerName] = useState<string>("");
   const [primaryCrop, setPrimaryCrop] = useState<string>("");
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
 
-  // ✅ Fetch latest farmer data from Firebase
+  // ✅ Fetch farmer data + auth state
   useEffect(() => {
     AOS.init({ duration: 1000, once: true, offset: 100 });
 
@@ -140,7 +146,28 @@ const Home: React.FC = () => {
     };
 
     fetchFarmerData();
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  // ✅ Proper Logout Handler
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Firebase sign-out
+      localStorage.clear(); // clear any cached farmer data
+      sessionStorage.clear();
+      setUser(null); // instantly update UI
+      alert("👋 You’ve been logged out successfully!");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("⚠️ Failed to log out. Please try again.");
+    }
+  };
 
   return (
     <div className="font-sans bg-[#fffdf6] text-amber-900 overflow-x-hidden">
@@ -163,12 +190,32 @@ const Home: React.FC = () => {
           ))}
         </nav>
 
-        <Link
-          to="/get-started"
-          className="bg-green-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-green-800 transition"
-        >
-          Get Started
-        </Link>
+        {/* ✅ Auth Buttons */}
+        <div className="flex items-center space-x-4">
+          {user ? (
+            <>
+              <div className="flex items-center space-x-2">
+                <FaUserCircle className="text-green-700 text-xl" />
+                <span className="font-medium text-amber-800">
+                  {user.displayName || user.email}
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-700 transition"
+              >
+                <FaSignOutAlt className="mr-2" /> Logout
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="flex items-center bg-green-700 text-white px-4 py-2 rounded-full font-semibold hover:bg-green-800 transition"
+            >
+              <FaSignInAlt className="mr-2" /> Login
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Hero Section */}
@@ -179,8 +226,10 @@ const Home: React.FC = () => {
         <div className="relative z-10" data-aos="fade-up">
           <h2 className="text-5xl font-extrabold mb-6 leading-snug">
             Welcome{" "}
-            {farmerName ? (
-              <span className="text-green-700">{farmerName}</span>
+            {user ? (
+              <span className="text-green-700">
+                {user.displayName || farmerName || "Farmer"}
+              </span>
             ) : (
               "Farmer"
             )}
@@ -196,110 +245,23 @@ const Home: React.FC = () => {
             sustainably.
           </p>
 
-          <Link
-            to="/dashboard"
-            className="bg-green-700 text-white px-8 py-4 rounded-full font-semibold hover:bg-green-800 transition"
-          >
-            Explore Dashboard 🌱
-          </Link>
-        </div>
-      </section>
-
-      {/* Curved Divider */}
-      <div className="w-full h-24 bg-gradient-to-b from-green-50 to-amber-50 rounded-t-[100%] mt-[-2rem]"></div>
-
-      {/* Features Section */}
-      <section
-        className="py-20 bg-gradient-to-br from-green-50 to-amber-50"
-        data-aos="fade-up"
-      >
-        <h3 className="text-4xl font-bold text-center mb-12">
-          How FarmGuard Works
-        </h3>
-        <div className="flex flex-wrap justify-center gap-10 px-4">
-          {features.map((f, i) => (
-            <div
-              key={i}
-              className={`relative bg-white rounded-3xl shadow-md p-8 w-80 transition-transform hover:-translate-y-2 hover:shadow-xl ${
-                i % 2 === 0 ? "rotate-1" : "-rotate-1"
-              }`}
-              data-aos="zoom-in"
-              data-aos-delay={i * 200}
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/dashboard"
+              className="bg-green-700 text-white px-8 py-4 rounded-full font-semibold hover:bg-green-800 transition"
             >
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-100 rounded-full p-4">
-                {f.icon}
-              </div>
-              <h4 className="mt-8 font-bold text-xl">{f.title}</h4>
-              <p className="text-amber-700 mt-2">{f.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+              Explore Dashboard 🌱
+            </Link>
 
-      {/* Resources Section */}
-      <section
-        className="relative py-24 bg-white overflow-hidden"
-        data-aos="fade-up"
-      >
-        <div className="absolute top-0 left-0 w-80 h-80 bg-amber-100 rounded-full blur-3xl opacity-30 animate-float"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-40 animate-float-slow"></div>
-
-        <div className="container mx-auto text-center relative z-10 px-4">
-          <h3 className="text-4xl font-bold mb-12">
-            Farmer’s Toolkit & Knowledge Base
-          </h3>
-          <div className="flex flex-wrap justify-center gap-10">
-            {resources.map((r, i) => (
-              <div
-                key={i}
-                className="bg-gradient-to-b from-amber-50 to-green-50 shadow-md rounded-[2rem] p-6 w-72 transform hover:scale-105 transition-all duration-500"
-                data-aos="fade-up"
-                data-aos-delay={i * 150}
-              >
-                <div className="flex justify-center mb-4">{r.icon}</div>
-                <h4 className="font-semibold text-lg text-amber-900">
-                  {r.title}
-                </h4>
-                <p className="text-amber-700 mt-2">{r.desc}</p>
-              </div>
-            ))}
+            <Link
+              to="/get-started"
+              className="bg-amber-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-amber-700 transition"
+            >
+              Get Started 🚜
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* FAQ Section */}
-      <section
-        className="py-20 bg-gradient-to-r from-amber-50 to-green-50"
-        data-aos="fade-up"
-      >
-        <h3 className="text-4xl font-bold text-center mb-10">
-          Frequently Asked Questions
-        </h3>
-        <div className="max-w-2xl mx-auto px-4">
-          {faqData.map((item, i) => (
-            <FAQItem
-              key={i}
-              item={item}
-              isOpen={openFaqIndex === i}
-              onClick={() =>
-                setOpenFaqIndex(openFaqIndex === i ? null : i)
-              }
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-amber-900 text-amber-100 py-10 mt-10">
-        <div className="container mx-auto text-center">
-          <p className="text-lg font-semibold mb-2">
-            🌱 FarmGuard — Growing Smarter, Together
-          </p>
-          <p className="text-sm">
-            © {new Date().getFullYear()} FarmGuard. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };
