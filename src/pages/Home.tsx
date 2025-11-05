@@ -1,4 +1,3 @@
-// src/pages/Home.tsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AOS from "aos";
@@ -15,6 +14,7 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaSignInAlt,
+  FaRobot,
 } from "react-icons/fa";
 import { db, auth } from "../firebase";
 import { collection, getDocs, orderBy, limit, query } from "firebase/firestore";
@@ -100,7 +100,6 @@ const Home: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
-  // ✅ Fetch farmer data + auth state
   useEffect(() => {
     AOS.init({ duration: 1000, once: true, offset: 100 });
 
@@ -167,8 +166,15 @@ const Home: React.FC = () => {
           ))}
         </nav>
 
-        {/* ✅ Auth Buttons */}
+        {/* ✅ Auth + Chatbot Button */}
         <div className="flex items-center space-x-4">
+          <button
+            onClick={() => navigate("/chatbot")}
+            className="flex items-center bg-green-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-green-700 transition"
+          >
+            <FaRobot className="mr-2" /> Talk to AI Assistant
+          </button>
+
           {user ? (
             <>
               <div className="flex items-center space-x-2">
@@ -240,7 +246,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features */}
       <section className="py-20 bg-white" data-aos="fade-up">
         <h2 className="text-4xl font-bold text-center mb-12 text-green-800">
           Why Choose FarmGuard?
@@ -259,7 +265,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Resources Section */}
+      {/* Resources */}
       <section className="py-20 bg-amber-50" data-aos="fade-up">
         <h2 className="text-4xl font-bold text-center mb-12 text-green-800">
           Resources for Every Farmer
@@ -278,7 +284,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ */}
       <section className="py-20 bg-white" data-aos="fade-up">
         <h2 className="text-4xl font-bold text-center mb-10 text-green-800">
           Frequently Asked Questions

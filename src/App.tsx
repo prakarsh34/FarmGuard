@@ -4,6 +4,8 @@ import GetStarted from "./pages/GetStarted";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Chatbot from "./pages/Chatbot";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -13,6 +15,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/chatbot" element={<Chatbot />} />
       </Routes>
     </BrowserRouter>
   );
